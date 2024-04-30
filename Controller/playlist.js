@@ -1,0 +1,90 @@
+const displayError = require("../Formatters/displayError")
+const { failResponse, successResponse } = require("../Formatters/displayResponse")
+const Playlist = require("../Models/playlist")
+
+exports.getUserPlaylist = async (req, res) => {
+    const {userId} = req.user
+   try{
+    const playlists = await Playlist.find({user: userId})
+    successResponse(res, {playlists})
+   }catch (e) {
+    failResponse()
+    displayError("Get User Playlist", e)
+   }
+}
+
+exports.createPlaylist = async (req, res) => {
+    const {userId} = req.user
+    const {name} = req.body
+    try{
+     if(!name){
+        failResponse(res, "Please provide name of playlist", 422)
+     } else {
+        const playlistWithProvidedName = Playlist.findOne({name})
+        if(playlistWithProvidedName){
+            failResponse(res,"Playlist Already Exists", 409)
+        } else {
+            const newPlaylist = new Playlist({
+                user:userId,
+                name:name,
+                songs:[]
+              })
+              await newPlaylist.save()
+              successResponse(res)   
+        }
+     }
+    }catch (e) {
+        failResponse()
+        displayError("Get User Playlist", e)
+    }
+}
+
+exports.deletePlaylist = async (req, res) => {
+    const {userId} = req.user
+    const {playlistId} = req.body
+    try{
+     if(!playlistId){
+        failResponse(res, "Please provide id of playlist", 422)
+     } else {
+        const playlistWithProvidedId = await Playlist.findById(playlistId)
+        if(playlistWithProvidedId){
+            if(userId !== playlistWithProvidedId.user.toString()){
+                failResponse(res, "Unauthorized", 401)
+            } else {
+                await Playlist.deleteOne({_id:playlistId})
+                successResponse(res)
+            }
+        }else{
+            failResponse(res,"No playlist found", 404)
+        }
+     }
+    }catch (e) {
+        failResponse(res)
+        displayError("Get User Playlist", e)
+    }
+}
+
+exports.updateNamePlaylist = async (req, res) => {
+    const {userId} = req.user
+    const {playlistId, updatedName} = req.body
+    try{
+     if(!playlistId || !updatedName){
+        failResponse(res, "Please provide id of playlist and updated name", 422)
+     } else {
+        const playlistWithProvidedId = await Playlist.findById(playlistId)
+        if(playlistWithProvidedId){
+            if(userId !== playlistWithProvidedId.user.toString()){
+                failResponse(res, "Unauthorized", 401)
+            } else {
+                await Playlist.updateOne({_id:playlistId},{name:updatedName})
+                successResponse(res)
+            }
+        }else{
+            failResponse(res,"No playlist found", 404)
+        }
+     }
+    }catch (e) {
+        failResponse(res)
+        displayError("Get User Playlist", e)
+    }
+}

@@ -15,8 +15,10 @@ app.use(cors({
 
 //import routes
 const userRoute = require("./Routes/user")
+const playlistRoute = require("./Routes/playlist")
 //using route in app
 app.use("/api/v1", userRoute)
+app.use("/api/v1", playlistRoute)
 
 
 module.exports = app

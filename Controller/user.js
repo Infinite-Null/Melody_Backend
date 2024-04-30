@@ -113,7 +113,7 @@ exports.login = async (req, res) => {
           if(user.isVerified){
              const correctPassword = await bcrypt.compare(password, user.password)
              if(correctPassword){
-                const token = jwt.sign({ email: email }, process.env.JWT_SECRET,{
+                const token = jwt.sign({ email: email, userId:user.id }, process.env.JWT_SECRET,{
                   expiresIn:process.env.JWT_EXPIRE
                 })
                 successResponse(res,{
