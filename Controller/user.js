@@ -2,6 +2,7 @@ const displayError = require("../Formatters/displayError")
 const { successResponse, failResponse } = require("../Formatters/displayResponse")
 const { sendVerificationMail } = require("../Helper/user/sendVerificationMail")
 const User = require("../Models/user")
+const Playlist = require("../Models/playlist")
 const { generateOtp } = require("../Utils/generateOtp")
 const bcrypt = require("bcryptjs")
 var jwt = require('jsonwebtoken')
@@ -22,6 +23,12 @@ exports.signup  = async (req , res) => {
                 password
               })
               await newUser.save()
+              const newPlaylist = new Playlist({
+                user:newUser._id.toString(),
+                name:"Liked Songs",
+                songs:[]
+              })
+              await newPlaylist.save()
               successResponse(res,{
                 message:"Verification code is sent to your mail please verify.",
                 email,
